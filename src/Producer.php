@@ -26,9 +26,13 @@ class Producer extends BaseAmqp
                 $this->channel->exchange_declare(
                     $this->exchangeOptions['name'],
                     $this->exchangeOptions['type'],
-                    false,
-                    true,
-                    false
+                    $this->exchangeOptions['passive'],
+                    $this->exchangeOptions['durable'],
+                    $this->exchangeOptions['auto_delete'],
+                    $this->exchangeOptions['internal'],
+                    $this->exchangeOptions['nowait'],
+                    $this->exchangeOptions['arguments'],
+                    $this->exchangeOptions['ticket']
                 );
             }
             $this->exchangeReady = true;
