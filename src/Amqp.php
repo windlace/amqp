@@ -164,7 +164,7 @@ class Amqp
 
         if($mqParams['exchangeType'] == 'x-delayed-message'){
             $exchangeOptions = array_merge($exchangeOptions,
-                ['arguments' => new AMQPTable(["x-delayed-type" => 'x-delayed-message'])]
+                ['arguments' => new AMQPTable(["x-delayed-type" => 'direct'])]
             );
         }
 
@@ -201,7 +201,7 @@ class Amqp
 
         if($mqParams['exchangeType'] == 'x-delayed-message'){
             $exchangeOptions = array_merge($exchangeOptions,
-                ['arguments' => new AMQPTable(["x-delayed-type" => 'x-delayed-message'])]
+                ['arguments' => new AMQPTable(["x-delayed-type" => 'direct'])]
             );
         }
 
