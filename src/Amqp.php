@@ -10,6 +10,7 @@ class Amqp
 
     const EXCHANGE_PREFIX = 'exchange.';
     const QUEUE_PREFIX    = 'queue.';
+    const EXCHANGE_TYPE_DELAYED = 'x-delayed-message';
 
     /**
      * @var string
@@ -162,7 +163,7 @@ class Amqp
             'type' => $mqParams['exchangeType']
         ];
 
-        if($mqParams['exchangeType'] == 'x-delayed-message'){
+        if($mqParams['exchangeType'] == self::EXCHANGE_TYPE_DELAYED){
             $exchangeOptions = array_merge($exchangeOptions,
                 ['arguments' => new AMQPTable(["x-delayed-type" => 'direct'])]
             );
@@ -199,7 +200,7 @@ class Amqp
             'type' => $mqParams['exchangeType']
         ];
 
-        if($mqParams['exchangeType'] == 'x-delayed-message'){
+        if($mqParams['exchangeType'] == self::EXCHANGE_TYPE_DELAYED){
             $exchangeOptions = array_merge($exchangeOptions,
                 ['arguments' => new AMQPTable(["x-delayed-type" => 'direct'])]
             );
@@ -207,7 +208,7 @@ class Amqp
 
         $producer->setExchangeOptions($exchangeOptions);
 
-        if ($delay > 0 && ($mqParams['exchangeType'] == 'x-delayed-message')) {
+        if ($delay > 0 && ($mqParams['exchangeType'] == self::EXCHANGE_TYPE_DELAYED)) {
             $producer->setParameter('application_headers', new AMQPTable([
                 "x-delay" => $delay,
             ]));
