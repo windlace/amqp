@@ -10,6 +10,7 @@ class Amqp
 
     const EXCHANGE_PREFIX = 'exchange.';
     const QUEUE_PREFIX    = 'queue.';
+    const EXCHANGE_TYPE_DELAYED = 'x-delayed-message';
 
     /**
      * @var string
@@ -156,7 +157,20 @@ class Amqp
         $connection = $amqp->getConnection();
 
         $consumer = new Consumer($connection);
-        $consumer->setExchangeOptions(['name' => static::EXCHANGE_PREFIX . $mqParams['exchangeName'], 'type' => $mqParams['exchangeType']]);
+
+        $exchangeOptions = [
+            'name' => static::EXCHANGE_PREFIX . $mqParams['exchangeName'],
+            'type' => $mqParams['exchangeType']
+        ];
+
+        if($mqParams['exchangeType'] == self::EXCHANGE_TYPE_DELAYED){
+            $exchangeOptions = array_merge($exchangeOptions,
+                ['arguments' => new AMQPTable(["x-delayed-type" => 'direct'])]
+            );
+        }
+
+        $consumer->setExchangeOptions($exchangeOptions);
+
         $consumer->setQueueOptions(['name' => static::QUEUE_PREFIX . $mqParams['queueName']]);
 
         if (isset($mqParams['dlxExchangeName'])) {
@@ -172,7 +186,7 @@ class Amqp
         $consumer->consume();
     }
 
-    public static function publish($paramsKey, $msgBody)
+    public static function publish($paramsKey, $msgBody, $delay = 0)
     {
         $mqParams = self::getParam($paramsKey);
 
@@ -180,11 +194,23 @@ class Amqp
         $connection = $amqp->getConnection();
 
         $producer = new Producer($connection);
-        $producer->setExchangeOptions(['name' => static::EXCHANGE_PREFIX.$mqParams['exchangeName'], 'type' => $mqParams['exchangeType']]);
 
-        if (false) {
+        $exchangeOptions = [
+            'name' => static::EXCHANGE_PREFIX.$mqParams['exchangeName'],
+            'type' => $mqParams['exchangeType']
+        ];
+
+        if($mqParams['exchangeType'] == self::EXCHANGE_TYPE_DELAYED){
+            $exchangeOptions = array_merge($exchangeOptions,
+                ['arguments' => new AMQPTable(["x-delayed-type" => 'direct'])]
+            );
+        }
+
+        $producer->setExchangeOptions($exchangeOptions);
+
+        if ($delay > 0 && ($mqParams['exchangeType'] == self::EXCHANGE_TYPE_DELAYED)) {
             $producer->setParameter('application_headers', new AMQPTable([
-//                "x-delay" => 123,
+                "x-delay" => $delay,
             ]));
         }
 
